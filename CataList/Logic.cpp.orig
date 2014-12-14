@@ -1,0 +1,351 @@
+#include "Logic.h"
+
+void Logic::main(){
+	_io.welcomeMessage();
+
+	LogicUndo undo;
+	Storage fileStorage;
+	fileStorage.readFile(_taskList);
+
+	do{
+		try{
+			_operation = _io.requestInput();
+			//	try{
+			if(userCommand(_operation))
+				_userInput = _io.getTaskDetails();
+			else
+				_userInput = _io.getInvalidInput();
+			//				if(((_userInput.length()==0)||_userInput==" ") && (_operation!="display" && _operation!="exit" && _operation!="undo"))
+			//		throw "error";
+			//}
+			//catch(const char* error)
+			//{
+			//	cerr << "Task details are not entered!Please retry."<<endl;
+			//}
+
+<<<<<<< local
+		if(_operation == "add"){		
+			if(_add.addNewTask(_taskList, _task, _userInput, _operation, _position)){
+				_position = _taskList.getSize() - 1;
+				_undo.addToUndoList(_task, _operation, _position);
+
+				fileStorage.addTaskToFile(_task, _position);
+				_io.successMessageForAdd();
+=======
+			if(_operation == "add"){		
+				if(_add.addNewTask(_taskList, _task, _userInput, _operation, _position)){
+					_position = _taskList.getSize() - 1;
+					_undo.addToUndoList(_task, _operation, _position);
+					fileStorage.addTaskToFile(_task, _position);
+					_io.successMessageForAdd();
+				}
+				else
+				_io.errorMessageForAdd();
+>>>>>>> other
+			}
+			else if (_operation == "delete"){
+				if(_delete.delTask(_taskList,_task, _userInput,_position)){
+					_undo.addToUndoList(_task, _operation, _position);
+					fileStorage.updateFile(_taskList);
+					_io.successMessageForDelete();
+				}
+				else
+					_io.errorMessageForDelete();
+			}
+			else if (_operation == "change"){
+				if(updateTask())
+					_io.successMessageForUpdate();
+				else
+					_io.errorMessageForUpdate();
+			}
+			//edit stub(userInput, operation)
+			else if (_operation == "search"){
+				if(!searchTask(_userInput))
+					/*		_io.successMessageForTaskSearch();
+					else*/
+					_io.errorMessageForTaskSearch();
+
+			}
+			//search stub(userInput, operation)
+			else if (_operation == "display"){
+				if(!displayTask(_taskList))
+					_io.errorMessageForDisplay();				
+			}
+			//display();
+			else if(_operation == "undo")
+			{
+				if(undoTask())
+					_io.successMessageForUndo();
+				else
+					_io.errorMessageForUndo();
+			}
+			else if (_operation == "exit")
+			{
+				_operation = "exit";
+				_io.successMessageForExit();
+			}
+
+			if(_operation!="+" && _operation!="-" && _operation!="add" &&
+				_operation!="delete" &&_operation!="search" && _operation!="find" && _operation!="change" &&
+				_operation!="update" && _operation!="show" && _operation!="exit" && _operation!="display"&& _operation!="undo")
+				throw (_operation.c_str());
+
+			//if(((_userInput.length()==0)||_userInput==" ") && (_operation!="display" && _operation!="exit" && _operation!="undo"))
+			//	throw _userInput.length();
+		}
+		//	catch(char* operation)
+		//{
+		//cerr << operation<<" is not a valid operation!Please retry."<<endl;
+		//}
+		//catch(int error)
+		//{
+		//	cerr << error<<" is not a valid operation!Please retry."<<endl;
+		//}
+		catch(char const* operation)
+		{
+			cerr << operation <<" is not a valid input!Please re-enter."<<endl;
+		}
+		catch(...)
+		{
+			cout<<"unknown error occurred!"<<endl;
+		}
+		//else
+		//_io.invalidCommand();
+	}while(_operation != "exit");
+}
+
+bool Logic::updateTask(){
+	return true;
+}
+
+bool Logic::searchTask(string userInput){
+	TaskList searchResult;
+	vector<int> taskFoundPosition;
+
+	if((_search.searchTaskList(_taskList, searchResult, taskFoundPosition, userInput))&& (userInput!=" ")){
+		displayTask(searchResult);
+		return true;
+	}
+	else
+		return false;
+}
+
+bool Logic::displayTask(TaskList taskList){
+	Task displayFront;
+	int i = 1;
+	_io.successMessageForDisplay();
+	while(!taskList.checkEmpty()){
+		taskList.getFrontTask(displayFront);
+
+		cout<<"Task "<<i<<":\nTASK STARTS ON "<<displayFront.getStartDay()<<"/"<<displayFront.getStartMonth()<<"/"<<displayFront.getStartYear()<<endl;
+		cout<<"TIME : "<<displayFront.getStartTime()<<endl;
+		cout<<"TASK ENDS ON "<<displayFront.getEndDay()<<"/"<<displayFront.getEndMonth()<<"/"<<displayFront.getEndYear()<<endl;
+		cout<<"TIME : "<<displayFront.getEndTime()<<endl;
+		cout<<"DESCRIPTION : "<<displayFront.getTaskDescription()<<endl;
+		cout<<"STATUS : "<<displayFront.getStatus()<<endl;
+
+		taskList.removeFrontTask();
+		i++;
+	}
+	return true;
+}
+
+bool Logic::undoTask(){
+	if(_undo.getUndoInfo(_task, _operation, _position)){
+		if(_operation == "add")
+			_delete.deleteAddedTask(_taskList, _task, _position);
+		else if(_operation == "delete")
+			_add.addDeletedTask(_taskList, _task, _position);
+		else if(_operation == "edit"){}
+		//_edit.undoEditedTask(_taskList, _task, _position);
+		return true;
+	}
+	else
+		return false;
+}
+
+bool Logic::userCommand(string& operation){
+	operation = convertLowercase(operation);
+
+	if(operation.find(ADDSIGN) == STARTPOSITION){
+		operation = "add";
+		return true;
+	}
+	else if(operation.find(DELSIGN) == STARTPOSITION){
+		operation = "delete";
+		return true;
+	}
+	else if (operation.find("add") == STARTPOSITION){
+		return true;
+	}
+	else if(operation.find("delete") == STARTPOSITION){
+		return true;
+	}
+	else if(operation.find("search") == STARTPOSITION){
+		return true;
+	}
+	else if(operation.find("find") == STARTPOSITION){
+		operation = "search";
+		return true;
+	}
+	else if(operation.find("change") == STARTPOSITION){
+		return true;
+	}
+	else if(operation.find("update") == STARTPOSITION){
+		operation = "change";
+		return true;
+	}
+	else if(operation.find("show") == STARTPOSITION){
+		operation = "display";
+		return false; //why false
+	}
+	else if(operation.find("undo") ==STARTPOSITION){
+		operation="undo";
+		return true;
+	}
+	else
+		return false;
+}
+
+string Logic::convertLowercase(string text){
+	transform(text.begin(), text.end(), text.begin(), ::tolower);
+	return text;
+}
+
+// current date/time based on current system
+void Logic::retrieveDateTime(int& year, int& month, int& day, int& hour, int& minute, string& dayOfTheWeek){
+
+	static string days[] = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
+	time_t now = time(0);
+	tm *ltm = localtime(&now);
+
+	year = 1900 + ltm->tm_year;
+	month = 1 + ltm->tm_mon;
+	day = ltm->tm_mday;
+	hour = ltm->tm_hour;
+	minute = ltm->tm_min;
+	dayOfTheWeek = days[ltm->tm_wday];
+}
+
+//bool Logic::checkDate(int date){ // check dates entered by user!! eg. "friday", if passed, will be next week, else this week
+//}
+
+//int Logic::checkMonth(string month){
+//	if(month == "jan" || month == "january")
+//		return 1;
+//	if(month == "feb" || month == "february")
+//		return 2;
+//	if(month == "mar" || month == "march")
+//		return 3;
+//	if(month == "apr" || month == "april")
+//		return 4;
+//	if(month == "may")
+//		return 5;
+//	if(month == "jun" || month == "june")
+//		return 6;
+//	if(month == "jul" || month == "july")
+//		return 7;
+//	if(month == "aug" || month == "august")
+//		return 8;
+//	if(month == "sept" || month == "september")
+//		return 9;
+//	if(month == "oct" || month == "october")
+//		return 10;
+//	if(month == "nov" || month == "november")
+//		return 11;
+//	if(month == "dec" || month == "december")
+//		return 12;
+//}
+//
+//bool Logic::checkYear(int year){
+//	if((year % 4 == 0) && !(year % 100 == 0) || (year % 400 == 0))
+//		return true;
+//	else
+//		return false;
+//}
+
+//bool Logic::parser(LogicUndo undo){
+//	if(parser()){
+//		undo.addToUndoList(_task, _operation, 1);//_position);
+//		return true;
+//	}
+//	else
+//		return false;
+//}
+//
+//bool Logic::parser(){
+//	string lowerCaseInput;
+//	int position;
+//
+//	lowerCaseInput = convertLowercase(_userInput);
+//
+//	if(findStartTime(lowerCaseInput, position)){
+//		_task.setTaskDescription(_userInput.substr(FIRSTPOSITION,position-TASKPOSITIONOFFSET));
+//		if(findEndTime(lowerCaseInput, position))
+//			setDate();
+//	}
+//	return true;
+//}
+//
+//void Logic::setDate(){
+//	int year,month,day,hr,min;
+//	string dayOfTheWeek;
+//
+//	retrieveDateTime(year,month,day,hr,min,dayOfTheWeek);
+//
+//	_task.setStartDay(day);
+//	_task.setStartMonth(month);
+//	_task.setStartYear(year);
+//	_task.setEndDay(day);
+//	_task.setEndMonth(month);
+//	_task.setEndYear(year);
+//	_task.setStatus("NOT DONE");
+//	_task.setDeadline(true);
+//}
+//
+//bool Logic::findStartTime(string lowerCaseInput, int& position){
+//	int timePosition = findTimePosition(_userInput, position);
+//
+//	if (timePosition == NOTFOUND)
+//		return false;
+//	else 
+//		_task.setStartTime(getTime(lowerCaseInput, timePosition));
+//	return true;
+//}
+//
+//bool Logic::findEndTime(string lowerCaseInput, int& position){
+//	int newPosition, endOfString, endTimePosition;
+//	string endTimeString;
+//
+//	newPosition = position+POSITIONOFFSET;
+//	endOfString = lowerCaseInput.length()-newPosition; 
+//	endTimeString = lowerCaseInput.substr(newPosition, endOfString);
+//	endTimePosition = findTimePosition(endTimeString, position);
+//
+//	if (endTimePosition != NOTFOUND)
+//		_task.setEndTime(getTime(endTimeString, endTimePosition));
+//	else 
+//		_task.setEndTime(((_task.getStartTime() + ONEHOUR) % ONEDAY));//add 00
+//
+//	//cout<<newTask.endTime<<endl;
+//	return true;
+//}
+//
+//int Logic::getTime(string stringToBeSearch,int timePosition){
+//	string Time;
+//
+//	Time = stringToBeSearch.substr(timePosition, TIMEOFFSET);
+//	//cout<<Time<<endl; //debug
+//
+//	return stoi(Time);
+//}
+//
+//int Logic::findTimePosition(string stringTemp, int& position){
+//	int timeIndex;
+//	timeIndex = stringTemp.find(HRS);
+//	position = timeIndex; //dinner with alex from 1800hrs to 2000hrs
+//
+//	if (timeIndex == -1)
+//		return timeIndex;
+//	return timeIndex-TIMEOFFSET;
+//}

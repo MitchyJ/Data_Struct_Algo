@@ -1,0 +1,38 @@
+#include "UI.h"
+
+void UI::main(){
+	cout << "*-*-*-*-*-*-*-*-*-*-*-*-*-*";
+	cout << "~ ~ WELCOME TO CATALIST ~ ~";
+	cout << "*-*-*-*-*-*-*-*-*-*-*-*-*-*";
+	do{
+		requestInput();
+		cin >> operation;
+		if(logic.userCommand(operation)){
+			getline(cin, userInput);
+			//compute user input
+		}
+
+		if(operation == "add"){}
+		//add stub(userInput, operation)
+		else if (operation == "delete"){}
+		//del stub(userInput, operation)
+		else if (operation == "change"){}
+		//edit stub(userInput, operation)
+		else if (operation == "search"){}
+		//search stub(userInput, operation)
+		else if (operation == "display"){}
+			//display();
+		else if (operation == "exit")
+			operation = "exit";
+		else
+			invalidCommand();
+	}while(operation != "exit");
+}
+
+void UI::requestInput(){
+	cout << "\nCommand: ";
+}
+
+void UI::invalidCommand(){
+	cout << "Invalid command!!";
+}

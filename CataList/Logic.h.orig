@@ -1,0 +1,98 @@
+#ifndef _LOGIC_H_
+#define _LOGIC_H_
+
+#include <iostream>
+#include <string>
+#include <stack>
+#include <algorithm>
+#include <ctime>
+#include <list>
+#include "UI.h"
+#include "Database.h"
+
+using namespace std;
+
+const int NOTFOUND = -1;
+const int TIMEOFFSET = 4;
+const int STARTPOSITION = 0;
+const int FIRSTPOSITION = 1;
+const int TIME = 4;
+const int ONEHOUR = 100;
+const int ONEDAY = 2400;
+const int POSITIONOFFSET = 3;
+const int TASKPOSITIONOFFSET = 6;
+const char ADDSIGN = '+';
+const char DELSIGN = '-';
+const string MORNING = "am ";
+const string AFTERNOON = "pm ";
+const string HRS = "hrs";
+
+//struct task{
+//		int startTime, endTime;
+//		int startDay, startMonth, startYear;
+//		int endDay, endMonth, endYear;
+//		string taskDescription, status;
+//		bool deadline;
+//	};
+
+class Logic{
+public:
+
+	//struct task{
+	//	int startTime, endTime;
+	//	int startDay, startMonth, startYear;
+	//	int endDay, endMonth, endYear;
+	//	string taskDescription, status;
+	//	bool deadline;
+	//};
+
+	struct history{
+		stack<task> changes;
+		stack<string> operation;
+	};
+	
+	void main();
+	bool userCommand(string&);
+	string convertLowercase(string);
+	void RetrieveDateTime(int&, int&, int&, int&, int&, string&);
+	bool checkdate(int);
+	bool checkyear(int);
+	bool checkmonth(int);
+	bool checkday(int);
+	bool addNewTask(string, list<task>&, history& ,task&);
+	bool delTask(string, list<task>&, history& ,task&);
+	bool updateTask();
+	bool searchTask();
+	bool displayTask(list<task>);
+	bool undoTask();
+	bool decodeTaskDetails(task&, string);
+	int findTimePosition(string, int&);
+	int getTime(string, int);
+	bool findStartTime(task&, string, int&);
+	bool findEndTime (task&, string, int&);
+	void setDate(task&);
+
+private:
+	list<task> taskList;
+
+	//struct history{
+	//	stack<task> changes;
+	//	stack<string> operation;
+	//};
+
+	UI io;
+
+	string operation;
+	string userInput;
+
+
+	//struct task{
+	//	int startTime, endTime;
+	//	int startDay, startMonth, startYear;
+	//	int endDay, endMonth, endYear;
+	//	string taskDescription, status;
+	//	bool deadline;
+	//};
+};
+
+#endif
